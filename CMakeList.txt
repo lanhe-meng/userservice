@@ -1,0 +1,44 @@
+cmake_minimum_required(VERSION 3.12)
+project(userservice LANGUAGES CXX)
+
+# 设置 C++ 标准
+set(CMAKE_CXX_STANDARD 17)
+
+# 查找必需库
+find_package(Threads REQUIRED)              # 线程支持
+find_package(Protobuf REQUIRED)             # Protobuf
+find_package(gRPC REQUIRED)                 # gRPC
+
+# 设置 proto 文件
+set(PROTO_FILE "${CMAKE_CURRENT_SOURCE_DIR}/proto/userservice.proto")
+
+# 自动生成 protobuf 和 gRPC 代码
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_FILE})
+grpc_generate_cpp(GRPC_SRCS GRPC_HDRS ${PROTO_FILE})
+
+# 添加服务端可执行文件
+add_executable(server src/server.cpp 
+    ${PROTO_SRCS} ${PROTO_HDRS}
+    ${GRPC_SRCS} ${GRPC_HDRS}
+)
+target_include_directories(server PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(server
+    gRPC::grpc++
+    gRPC::grpc
+    gRPC::grpc++_reflection  # 服务端反射支持
+    ${Protobuf_LIBRARIES}
+    Threads::Threads
+)
+
+# 添加客户端可执行文件
+add_executable(client src/client.cpp 
+    ${PROTO_SRCS} ${PROTO_HDRS}
+    ${GRPC_SRCS} ${GRPC_HDRS}
+)
+target_include_directories(client PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(client
+    gRPC::grpc++
+    gRPC::grpc
+    ${Protobuf_LIBRARIES}
+    Threads::Threads
+)

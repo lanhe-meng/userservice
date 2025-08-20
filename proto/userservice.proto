@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package user;
+
+service UserService{
+    rpc CreateUser(CreateUserRequest)returns (CommonResponse){}
+    rpc GetUser(UserName)returns(UserInfo){}
+    rpc UpdateUser(UserInfo)returns(CommonResponse){}
+    rpc DeleteUser(UserName)returns(CommonResponse){}
+}
+
+message CreateUserRequest{
+    string username = 1;
+    string password = 2;
+}
+
+message UserName{
+    string username = 1;
+}
+
+message UserInfo{
+    string username = 1;
+    string nickname = 2;
+    uint64 last_login_time = 3;
+    uint64 last_login_ip = 4;
+}
+
+message CommonResponse{
+    string ok = 1;
+    string status = 2;
+}
